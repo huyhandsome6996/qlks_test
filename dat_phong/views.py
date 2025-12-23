@@ -4,12 +4,15 @@ from django.utils import timezone
 from khach_san.models import Phong
 from .models import DatPhong, SuDungDichVu, DichVu
 from hoa_don.models import HoaDon
+from django.contrib.admin.views.decorators import staff_member_required
+
 
 
 
 # =========================
 # TẠO ĐẶT PHÒNG
 # =========================
+@staff_member_required
 def tao_dat_phong(request):
     phong_trong = Phong.objects.filter(trang_thai='trong')
 
@@ -49,10 +52,8 @@ def tao_dat_phong(request):
 # CHECK-OUT + TÍNH TIỀN
 # =========================
 
-from django.shortcuts import render, redirect, get_object_or_404
-from django.utils import timezone
-from hoa_don.models import HoaDon
 
+@staff_member_required
 def check_out(request, dat_phong_id):
     dat_phong = get_object_or_404(
         DatPhong,
@@ -112,7 +113,7 @@ def check_out(request, dat_phong_id):
 
 
 
-
+@staff_member_required
 def them_dich_vu(request, dat_phong_id):
     dat_phong = get_object_or_404(DatPhong, id=dat_phong_id, dang_o=True)
     danh_sach_dich_vu = DichVu.objects.all()

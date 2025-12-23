@@ -1,6 +1,9 @@
 from django.shortcuts import render
 from khach_san.models import Phong
 from dat_phong.models import DatPhong
+from django.contrib.admin.views.decorators import staff_member_required
+
+
 
 def trang_chu(request):
     return render(request, 'trang_chu.html', {
@@ -11,6 +14,7 @@ def trang_chu(request):
         'danh_sach_phong': Phong.objects.select_related('loai_phong').all()
     })
 #-----------------------------------------------
+@staff_member_required
 def bao_cao_cong_suat_phong(request): #Tú 1
     tong_phong = Phong.objects.count()
     phong_dang_o = DatPhong.objects.filter(dang_o=True).count()
