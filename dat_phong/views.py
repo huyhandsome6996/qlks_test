@@ -3,6 +3,7 @@ from django.utils import timezone
 
 from khach_san.models import Phong
 from .models import DatPhong, SuDungDichVu, DichVu
+from hoa_don.models import HoaDon
 
 
 
@@ -60,29 +61,32 @@ def check_out(request, dat_phong_id):
     gia_mot_dem = dat_phong.phong.loai_phong.gia_mot_dem
     ds_dich_vu = SuDungDichVu.objects.filter(dat_phong=dat_phong)
     tong_dich_vu = sum(dv.thanh_tien() for dv in ds_dich_vu)
+    tien_phong = so_dem * gia_mot_dem
+
 
     tong_tien = so_dem * gia_mot_dem + tong_dich_vu
 
     if request.method == 'POST':
+        # 1. Cập nhật đặt phòng
         dat_phong.ngay_tra = ngay_tra
         dat_phong.dang_o = False
         dat_phong.save()
-
+        # 2. Cập nhật trạng thái phòng
         phong = dat_phong.phong
         phong.trang_thai = 'trong'
         phong.save()
+        HoaDon.objects.get_or_create(
+        dat_phong=dat_phong,
+        defaults={
+            'tien_phong': tien_phong,
+            'tien_dich_vu': tong_dich_vu,
+            'tong_tien': tong_tien,
+            'trang_thai': 'chua_tt'
+        }
+    )
 
-        return redirect('bao_cao:trang_chu')
+    return redirect('hoa_don:chi_tiet', dat_phong.id)
 
-    context = {
-        'dat_phong': dat_phong,
-        'so_dem': so_dem,
-        'gia_mot_dem': gia_mot_dem,
-        'ds_dich_vu': ds_dich_vu,
-        'tong_dich_vu': tong_dich_vu,
-        'tong_tien': tong_tien
-    }
-    return render(request, 'dat_phong/checkout.html', context)
 
 
 def them_dich_vu(request, dat_phong_id):
