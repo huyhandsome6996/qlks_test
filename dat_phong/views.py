@@ -3,6 +3,7 @@ from django.utils import timezone
 
 from khach_san.models import Phong
 from .models import DatPhong, SuDungDichVu, DichVu
+from hoa_don.models import HoaDon
 
 
 
@@ -48,41 +49,68 @@ def tao_dat_phong(request):
 # CHECK-OUT + TÍNH TIỀN
 # =========================
 
-def check_out(request, dat_phong_id):
-    dat_phong = get_object_or_404(DatPhong, id=dat_phong_id, dang_o=True)
-    
+from django.shortcuts import render, redirect, get_object_or_404
+from django.utils import timezone
+from hoa_don.models import HoaDon
 
+def check_out(request, dat_phong_id):
+    dat_phong = get_object_or_404(
+        DatPhong,
+        id=dat_phong_id,
+        dang_o=True
+    )
+
+    # ====== TÍNH TIỀN ======
     ngay_tra = timezone.now().date()
     so_dem = (ngay_tra - dat_phong.ngay_nhan).days
     if so_dem <= 0:
         so_dem = 1
 
     gia_mot_dem = dat_phong.phong.loai_phong.gia_mot_dem
+
     ds_dich_vu = SuDungDichVu.objects.filter(dat_phong=dat_phong)
-    tong_dich_vu = sum(dv.thanh_tien() for dv in ds_dich_vu)
+    tong_dich_vu = sum(dv.thanh_tien for dv in ds_dich_vu)
 
-    tong_tien = so_dem * gia_mot_dem + tong_dich_vu
+    tien_phong = so_dem * gia_mot_dem
+    tong_tien = tien_phong + tong_dich_vu
 
+    # ====== KHI XÁC NHẬN CHECK-OUT ======
     if request.method == 'POST':
+        # 1. Cập nhật đặt phòng
         dat_phong.ngay_tra = ngay_tra
         dat_phong.dang_o = False
         dat_phong.save()
 
+        # 2. Cập nhật phòng
         phong = dat_phong.phong
         phong.trang_thai = 'trong'
         phong.save()
 
-        return redirect('bao_cao:trang_chu')
+        # 3. TẠO HÓA ĐƠN (QUAN TRỌNG)
+        HoaDon.objects.get_or_create(
+            dat_phong=dat_phong,
+            defaults={
+                'tien_phong': tien_phong,
+                'tien_dich_vu': tong_dich_vu,
+                'tong_tien': tong_tien,
+                'trang_thai': 'chua_tt'
+            }
+        )
 
-    context = {
+        # 4. CHỈ redirect SAU KHI ĐÃ TẠO HÓA ĐƠN
+        return redirect('hoa_don:chi_tiet', dat_phong.id)
+
+    # ====== GET: HIỂN THỊ TRANG CHECKOUT ======
+    return render(request, 'dat_phong/checkout.html', {
         'dat_phong': dat_phong,
         'so_dem': so_dem,
-        'gia_mot_dem': gia_mot_dem,
+        'tien_phong': tien_phong,
         'ds_dich_vu': ds_dich_vu,
-        'tong_dich_vu': tong_dich_vu,
-        'tong_tien': tong_tien
-    }
-    return render(request, 'dat_phong/checkout.html', context)
+        'tien_dich_vu': tong_dich_vu,
+        'tong_tien': tong_tien,
+    })
+
+
 
 
 def them_dich_vu(request, dat_phong_id):
