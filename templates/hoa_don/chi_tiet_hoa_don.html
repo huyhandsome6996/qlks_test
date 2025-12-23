@@ -25,4 +25,11 @@
     {% endif %}
   </div>
 </div>
+{% if hoa_don.trang_thai == 'chua_tt' %}
+  <a href="{% url 'hoa_don:thanh_toan' hoa_don.dat_phong.id %}"
+     class="btn btn-success mt-3">
+    Thanh toán
+  </a>
+{% endif %}
+
 {% endblock %}
