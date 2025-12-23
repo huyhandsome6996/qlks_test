@@ -1,0 +1,71 @@
+{% extends "base.html" %}
+
+{% block title %}Chi tiết phòng {{ phong.ma_phong }}{% endblock %}
+{% block page_title %}Chi tiết phòng {{ phong.ma_phong }}{% endblock %}
+
+{% block content %}
+<div class="card shadow-sm">
+  <div class="card-body">
+    <h5 class="mb-3">Thông tin phòng</h5>
+
+    <p><strong>Mã phòng:</strong> {{ phong.ma_phong }}</p>
+    <p><strong>Loại phòng:</strong> {{ phong.loai_phong.ten_loai }}</p>
+    <p>
+      <strong>Trạng thái:</strong>
+      {% if phong.trang_thai == 'trong' %}
+        <span class="badge bg-success">Trống</span>
+      {% elif phong.trang_thai == 'dang_thue' %}
+        <span class="badge bg-danger">Đang thuê</span>
+      {% elif phong.trang_thai == 'dang_bao_tri' %}
+        <span class="badge bg-warning text-dark">Đang bảo trì</span>
+      {% endif %}
+    </p>
+
+<!--sửa lại nút quay lại trang chủ-->    
+  <a
+    href="{% url 'bao_cao:trang_chu' %}"
+    class="btn btn-primary btn-sm w-100"
+  >
+    quay lại trang chủ
+  </a>
+<!--sửa lại nút quay lại trang chủ-->
+
+{% if dat_phong_hien_tai %}
+    <a
+        href="{% url 'dat_phong:them_dich_vu' dat_phong_hien_tai.id %}"
+        class="btn btn-warning"
+    >
+        Thêm dịch vụ
+    </a>
+{% else %}
+    <div class="alert alert-secondary mt-3">
+        Phòng hiện tại chưa có khách.
+    </div>
+{% endif %}
+
+
+
+
+
+
+
+  </div>
+</div>
+<hr>
+
+<!-- ngọ 4, Huy sửa lại: -->
+{% if phong.trang_thai == 'trong' %}
+    <a href="{% url 'khach_san:check_in' phong.ma_phong %}"
+       class="btn btn-success">
+        Check-in
+    </a>
+
+{% elif phong.trang_thai == 'dang_thue' and dat_phong_hien_tai %}
+    <a href="{% url 'dat_phong:check_out' dat_phong_hien_tai.id %}"
+       class="btn btn-danger">
+        Check-out & Tính tiền
+    </a>
+{% endif %}
+
+
+{% endblock %}
