@@ -384,14 +384,21 @@
       }
     </style> {% block head %}{% endblock %}   {% with view_name=request.resolver_match.view_name %} <!-- Sidebar -->
   <aside class="sidebar" id="sidebar">
-   <div class="sidebar-header"><span class="sidebar-logo">🌿</span>
-    <div class="sidebar-title">
-     Spring View Garden SaPa
-    </div>
-    <div class="sidebar-subtitle">
-     Hệ thống quản lý nội bộ
-    </div>
-   </div>
+   <div class="sidebar-header">
+  <img
+    src="{% static 'images/logo3.png' %}"
+    alt="Logo Spring View Garden SaPa"
+    class="sidebar-logo-img"
+  />
+
+  <div class="sidebar-title">
+    Spring View Garden SaPa
+  </div>
+  <div class="sidebar-subtitle">
+    Hệ thống quản lý nội bộ
+  </div>
+</div>
+
    <nav class="sidebar-menu">
     <div class="menu-section">
      <div class="nhom-menu">
